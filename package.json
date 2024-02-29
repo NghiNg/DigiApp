@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "react": "18.2.0",
-    "react-native": "0.73.3",
+    "react-native": "^0.73.5",
+    "react-native-image-progress": "^1.2.0",
+    "react-native-progress": "^5.0.1",
+    "react-native-svg": "^15.0.0",
     "react-native-swiper": "^1.6.0"
   },
   "devDependencies": {

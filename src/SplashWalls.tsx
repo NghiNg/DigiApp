@@ -1,7 +1,15 @@
 let RandManager = require('./RandManager');
 let Swiper = require('react-native-swiper');
 import React, {ReactElement, useEffect, useState} from 'react';
-import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import {Circle} from 'react-native-progress';
+import NetworkImage from 'react-native-image-progress';
 
 const NUM_WALLPAPERS = 5;
 export const SplashWalls = (): ReactElement => {
@@ -15,9 +23,9 @@ export const SplashWalls = (): ReactElement => {
           animating={true}
           color={'#fff'}
           size={'small'}
-          style={{margin: 15}}
+          style={styles.loading}
         />
-        <Text style={{color: '#fff'}}>Contacting Unsplash</Text>
+        <Text>Contacting Unsplash</Text>
       </View>
     );
   };
@@ -26,35 +34,29 @@ export const SplashWalls = (): ReactElement => {
     return (
       <Swiper
         showsPagination={true}
-        dot={
-          <View
-            style={{
-              backgroundColor: 'rgba(255, 255, 255,.4)',
-              width: 8,
-              height: 8,
-              borderRadius: 10,
-              marginLeft: 3,
-              marginRight: 3,
-              marginTop: 3,
-              marginBottom: 3,
-            }}
-          />
-        }
-        activeDot={
-          <View
-            style={{
-              backgroundColor: '#fff',
-              width: 13,
-              height: 13,
-              borderRadius: 7,
-              marginLeft: 7,
-              marginRight: 7,
-            }}
-          />
-        }
+        dot={<View style={styles.dot} />}
+        activeDot={<View style={styles.activeDot} />}
         loop={false}>
         {wallsJSON.map((wallpaper, index) => {
-          return <Text key={index}>{wallpaper.author}</Text>;
+          return (
+            <>
+              <NetworkImage
+                key={index}
+                source={{
+                  uri: `https://unsplash.it/${wallpaper.width}/${wallpaper.height}?image=${wallpaper.id}`,
+                }}
+                indicator={Circle}
+                style={styles.wallpaperImage}
+                indicatorProps={{
+                  color: 'rgb(255, 255, 255)',
+                  size: 60,
+                  thickness: 7,
+                }}
+              />
+              <Text style={styles.label}>Photo by</Text>
+              <Text style={styles.label_authorName}>{wallpaper.author}</Text>
+            </>
+          );
         })}
       </Swiper>
     );
@@ -62,7 +64,7 @@ export const SplashWalls = (): ReactElement => {
 
   useEffect(() => {
     const fetchWallsJSON = () => {
-      var url = 'https://unsplash.it/list';
+      const url = 'https://unsplash.it/list';
       fetch(url)
         .then(response => response.json())
         .then(jsonData => {
@@ -90,6 +92,7 @@ export const SplashWalls = (): ReactElement => {
   }
 };
 
+const {width, height} = Dimensions.get('window');
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
@@ -97,5 +100,56 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000',
+  },
+  wallpaperImage: {
+    flex: 1,
+    width: width,
+    height: height,
+    backgroundColor: '#000',
+  },
+  activeDot: {
+    backgroundColor: '#fff',
+    width: 13,
+    height: 13,
+    borderRadius: 7,
+    marginLeft: 7,
+    marginRight: 7,
+  },
+  dot: {
+    backgroundColor: 'rgba(255, 255, 255,.4)',
+    width: 8,
+    height: 8,
+    borderRadius: 10,
+    marginLeft: 3,
+    marginRight: 3,
+    marginTop: 3,
+    marginBottom: 3,
+  },
+  loading: {
+    margin: 15,
+    color: '#fff',
+  },
+  label: {
+    position: 'absolute',
+    color: '#fff',
+    fontSize: 13,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    padding: 2,
+    paddingLeft: 5,
+    top: 20,
+    left: 20,
+    width: width / 2,
+  },
+  label_authorName: {
+    position: 'absolute',
+    color: '#fff',
+    fontSize: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    padding: 2,
+    paddingLeft: 5,
+    top: 41,
+    left: 20,
+    fontWeight: 'bold',
+    width: width / 2,
   },
 });
