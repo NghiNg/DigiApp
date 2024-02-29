@@ -1,9 +1,11 @@
 let RandManager = require('./RandManager');
 let Swiper = require('react-native-swiper');
-import React, {ReactElement, useEffect, useState} from 'react';
+import React, {ReactElement, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Dimensions,
+  PanResponder,
+  PanResponderInstance,
   StyleSheet,
   Text,
   View,
@@ -15,7 +17,8 @@ const NUM_WALLPAPERS = 5;
 export const SplashWalls = (): ReactElement => {
   const [isLoading, setIsLoading] = useState(true);
   const [wallsJSON, setWallsJSON] = useState<Array<any>>([]);
-
+  let imagePanResponder = useRef<PanResponderInstance>({});
+  console.log(imagePanResponder);
   const renderLoadingMessage = () => {
     return (
       <View style={styles.loadingContainer}>
@@ -37,11 +40,10 @@ export const SplashWalls = (): ReactElement => {
         dot={<View style={styles.dot} />}
         activeDot={<View style={styles.activeDot} />}
         loop={false}>
-        {wallsJSON.map((wallpaper, index) => {
+        {wallsJSON.map((wallpaper, id) => {
           return (
-            <>
+            <React.Fragment key={id}>
               <NetworkImage
-                key={index}
                 source={{
                   uri: `https://unsplash.it/${wallpaper.width}/${wallpaper.height}?image=${wallpaper.id}`,
                 }}
@@ -52,10 +54,11 @@ export const SplashWalls = (): ReactElement => {
                   size: 60,
                   thickness: 7,
                 }}
+                {...imagePanResponder.current.panHandlers}
               />
               <Text style={styles.label}>Photo by</Text>
               <Text style={styles.label_authorName}>{wallpaper.author}</Text>
-            </>
+            </React.Fragment>
           );
         })}
       </Swiper>
@@ -83,6 +86,22 @@ export const SplashWalls = (): ReactElement => {
         .catch(error => console.log('Fetch error ' + error));
     };
     fetchWallsJSON();
+    const handleStartShouldSetPanResponder = (e, gestureState) => {
+      return true;
+    };
+    const handlePanResponderGrant = (e, gestureState) => {
+      console.log('Finger touched the image');
+    };
+    const handlePanResponderEnd = (e, gestureState) => {
+      console.log('Finger pulled up from the image');
+    };
+    imagePanResponder.current = PanResponder.create({
+      onStartShouldSetPanResponder: handleStartShouldSetPanResponder,
+      onPanResponderGrant: handlePanResponderGrant,
+      onPanResponderRelease: handlePanResponderEnd,
+      onPanResponderTerminate: handlePanResponderEnd,
+    });
+    console.log('settinge useEffect');
   }, []);
 
   if (isLoading) {
